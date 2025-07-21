@@ -70,19 +70,19 @@ setup_prefix () {
 	[ "$cpu_family" == "i686" ] && cpu_family=x86
 
 	if ! command -v pkg-config >/dev/null; then
-		echo "未提供pkg-config!"
-		返回 1
-	输入：fi
+		echo "pkg-config not provided!"
+		return 1
+	fi
 
-	# meson希望提前创建这个文件以便喂食，所以提前创建
-	# 还定义：发布版、静态库和运行时禁止下载源代码(!!!)
-	猫 >"$prefix_dir/crossfile.tmp" <<CROSSFILE
-[内置选项]
-构建类型 = '发布版'
-默认库 = '静态'
-包装模式 = '不下载'
-前缀 = '/usr/local'
-[二进制文件]
+	# meson wants to be spoonfed this file, so create it ahead of time
+	# also define: release build, static libs and no source downloads at runtime(!!!)
+	cat >"$prefix_dir/crossfile.tmp" <<CROSSFILE
+[built-in options]
+buildtype = 'release'
+default_library = 'static'
+wrap_mode = 'nodownload'
+prefix = '/usr/local'
+[binaries]
 c = '$CC'
 cpp = '$CXX'
 ar = 'llvm-ar'
