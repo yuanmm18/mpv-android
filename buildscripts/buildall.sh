@@ -1,53 +1,54 @@
 #!/bin/bash -e
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
-. ./include/depinfo.sh
+./include/depinfo.sh
 
-cleanbuild=0
-nodeps=0
-clang=1
-target=mpv-android
-arch=armv7l
+清理构建=0
+无依赖=
+0
+响=1
+目标=mpv-安卓
+架构=armv7l
 
-getdeps () {
-	varname="dep_${1//-/_}[*]"
-	echo ${!varname}
+获取依赖 () {
+	变量名="dep_${1//-/_}[*]"
+	回显  ${!varname} 
 }
 
-loadarch () {
-	unset CC CXX CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
-	unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+加载架构 () {{
+	未设置 CC CXX CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+	未设置 CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
 
-	local apilvl=21
-	# ndk_triple: what the toolchain actually is
-	# cc_triple: what Google pretends the toolchain is
-	if [ "$1" == "armv7l" ]; then
-		export ndk_suffix=
-		export ndk_triple=arm-linux-androideabi
+	本地 apilvl=21
+	# ndk_triple: 工具链实际上是什么
+	# cc_triple: Google 所谓的工具链
+如果 [ ] 等于 那么
+		导出 ndk后缀=
+		导出 ndk_三重=arm-linux-androideabi
 		cc_triple=armv7a-linux-androideabi$apilvl
-		prefix_name=armv7l
+		前缀名=armv7l
 	elif [ "$1" == "arm64" ]; then
-		export ndk_suffix=-arm64
-		export ndk_triple=aarch64-linux-android
-		cc_triple=$ndk_triple$apilvl
-		prefix_name=arm64
+		导出 ndk后缀=-arm64
+		导出 ndk_三重=aarch64-linux-android
+cc_triple = $ndk_triple$apilvl
+		前缀名=arm64
 	elif [ "$1" == "x86" ]; then
-		export ndk_suffix=-x86
-		export ndk_triple=i686-linux-android
-		cc_triple=$ndk_triple$apilvl
-		prefix_name=x86
+		导出 ndk后缀=-x86
+		导出 ndk_triple=i686-linux-android
+cc_triple = $ndk_triple$apilvl
+		前缀名=x86
 	elif [ "$1" == "x86_64" ]; then
-		export ndk_suffix=-x64
-		export ndk_triple=x86_64-linux-android
-		cc_triple=$ndk_triple$apilvl
-		prefix_name=x86_64
-	else
-		echo "Invalid architecture" >&2
-		exit 1
-	fi
-	export prefix_dir="$PWD/prefix/$prefix_name"
-	if [ $clang -eq 1 ]; then
-		export CC=$cc_triple-clang
+		导出 ndk后缀=-x64
+		导出 ndk_三重=x86_64-linux-android
+cc_triple = $ndk_triple$apilvl
+		前缀名=x86_64
+	否则
+		echo "无效的架构" >&2
+		退出 1
+	输入：fi
+	导出 前缀目录="$PWD/prefix/$prefix_name"
+	if [ $clang -eq 1 ]; then      
+		导出CC=$cc_triple-clang
 		export CXX=$cc_triple-clang++
 	else
 		export CC=$cc_triple-gcc
@@ -70,19 +71,19 @@ setup_prefix () {
 	[ "$cpu_family" == "i686" ] && cpu_family=x86
 
 	if ! command -v pkg-config >/dev/null; then
-		echo "pkg-config not provided!"
-		return 1
-	fi
+		echo "未提供pkg-config!"
+		返回 1
+	输入：fi
 
-	# meson wants to be spoonfed this file, so create it ahead of time
-	# also define: release build, static libs and no source downloads at runtime(!!!)
-	cat >"$prefix_dir/crossfile.tmp" <<CROSSFILE
-[built-in options]
-buildtype = 'release'
-default_library = 'static'
-wrap_mode = 'nodownload'
-prefix = '/usr/local'
-[binaries]
+	# meson希望提前创建这个文件以便喂食，所以提前创建
+	# 还定义：发布版、静态库和运行时禁止下载源代码(!!!)
+	猫 >"$prefix_dir/crossfile.tmp" <<CROSSFILE
+[内置选项]
+构建类型 = '发布版'
+默认库 = '静态'
+包装模式 = '不下载'
+前缀 = '/usr/local'
+[二进制文件]
 c = '$CC'
 cpp = '$CXX'
 ar = 'llvm-ar'
@@ -169,7 +170,12 @@ while [ $# -gt 0 ]; do
 	esac
 	shift
 done
-
+# 参数兼容：把 arm64-v8a 映射为 arm64
+if [ "$arch" = "arm64-v8a" ]; then
+  arch=arm64
+elif [ "$arch" = "armeabi-v7a" ]; then
+  arch=armv7l
+fi
 loadarch $arch
 setup_prefix
 build $target
