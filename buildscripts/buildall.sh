@@ -1,54 +1,53 @@
 #!/bin/bash -e
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
-./include/depinfo.sh
+. ./include/depinfo.sh
 
-清理构建=0
-无依赖=
-0
-响=1
-目标=mpv-安卓
-架构=armv7l
+cleanbuild=0
+nodeps=0
+clang=1
+target=mpv-android
+arch=armv7l
 
-获取依赖 () {
-	变量名="dep_${1//-/_}[*]"
-	回显  ${!varname} 
+getdeps () {
+	varname="dep_${1//-/_}[*]"
+	echo ${!varname}
 }
 
-加载架构 () {{
-	未设置 CC CXX CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
-	未设置 CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+loadarch () {
+	unset CC CXX CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+	unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
 
-	本地 apilvl=21
-	# ndk_triple: 工具链实际上是什么
-	# cc_triple: Google 所谓的工具链
-如果 [ ] 等于 那么
-		导出 ndk后缀=
-		导出 ndk_三重=arm-linux-androideabi
+	local apilvl=21
+	# ndk_triple: what the toolchain actually is
+	# cc_triple: what Google pretends the toolchain is
+	if [ "$1" == "armv7l" ]; then
+		export ndk_suffix=
+		export ndk_triple=arm-linux-androideabi
 		cc_triple=armv7a-linux-androideabi$apilvl
-		前缀名=armv7l
+		prefix_name=armv7l
 	elif [ "$1" == "arm64" ]; then
-		导出 ndk后缀=-arm64
-		导出 ndk_三重=aarch64-linux-android
-cc_triple = $ndk_triple$apilvl
-		前缀名=arm64
+		export ndk_suffix=-arm64
+		export ndk_triple=aarch64-linux-android
+		cc_triple=$ndk_triple$apilvl
+		prefix_name=arm64
 	elif [ "$1" == "x86" ]; then
-		导出 ndk后缀=-x86
-		导出 ndk_triple=i686-linux-android
-cc_triple = $ndk_triple$apilvl
-		前缀名=x86
+		export ndk_suffix=-x86
+		export ndk_triple=i686-linux-android
+		cc_triple=$ndk_triple$apilvl
+		prefix_name=x86
 	elif [ "$1" == "x86_64" ]; then
-		导出 ndk后缀=-x64
-		导出 ndk_三重=x86_64-linux-android
-cc_triple = $ndk_triple$apilvl
-		前缀名=x86_64
-	否则
-		echo "无效的架构" >&2
-		退出 1
-	输入：fi
-	导出 前缀目录="$PWD/prefix/$prefix_name"
-	if [ $clang -eq 1 ]; then      
-		导出CC=$cc_triple-clang
+		export ndk_suffix=-x64
+		export ndk_triple=x86_64-linux-android
+		cc_triple=$ndk_triple$apilvl
+		prefix_name=x86_64
+	else
+		echo "Invalid architecture" >&2
+		exit 1
+	fi
+	export prefix_dir="$PWD/prefix/$prefix_name"
+	if [ $clang -eq 1 ]; then
+		export CC=$cc_triple-clang
 		export CXX=$cc_triple-clang++
 	else
 		export CC=$cc_triple-gcc
