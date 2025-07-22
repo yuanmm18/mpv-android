@@ -27,6 +27,10 @@ jobs:
             build-essential pkg-config libtool autoconf automake cmake \
             unzip wget curl yasm nasm ninja-build
 
+      - name: Upgrade Meson
+        run: |
+          sudo pip3 install --upgrade meson
+
       - name: Download SDK and dependencies
         run: |
           cd buildscripts
