@@ -36,7 +36,7 @@ jobs:
       - name: Build mpv-android so
         run: |
           cd buildscripts
-          ./buildall.sh arm64-v8a
+          ./buildall.sh --arch arm64 mpv-android
 
       - name: Upload so artifacts
         uses: actions/upload-artifact@v4
